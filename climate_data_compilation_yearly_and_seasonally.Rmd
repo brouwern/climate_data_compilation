@@ -1,0 +1,259 @@
+---
+title: "Compile monthly climate & environmental data"
+author: "brouwern@gmail.com"
+date: "July 19, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Libraries
+```{r}
+library(RCurl)
+```
+
+## Download data from github
+
+Function to get.csv data from github and load as dataframe
+
+```{r}
+get.git.csv <- function(URL){
+  temp <- getURL(URL)
+  temp <- read.csv(text = temp)
+  return(temp)
+}
+```
+
+
+URLS for processed monthly data on github
+```{r}
+#nominal el nino events, by YEAR
+elninos <-"https://raw.githubusercontent.com/brouwern/el_nino_nominal_events/master/data/data_out/el_nino_nominal_events.csv"
+
+#MONTHLY SOI
+## SOI is a single value for the globe
+soi.yr <- "https://raw.githubusercontent.com/brouwern/global_climate_indices/master/data/data_out/climate_index_SOI_annual_summary1951_2016.csv"
+
+
+#MONTHLY NAO
+## NAO is a single value for the globe
+nao.yr <- "https://raw.githubusercontent.com/brouwern/global_climate_indices/master/data/data_out/climate_index_NAO_annual_summary1821_2017.csv"
+
+
+
+#2 month running MEI
+## NAO is a single value for the globe
+mei.yr <- "https://raw.githubusercontent.com/brouwern/global_climate_indices/master/data/data_out/climate_index_MEI_annual_summary1950_2016.csv"
+
+
+
+
+#MONTHLY chirps rainfall
+##rainfall calcualted for each site
+chirps <-"https://raw.githubusercontent.com/brouwern/rainfall_CHIRPS/master/data/data_out/CHIRPS_rainfall_annual_summary.csv"
+
+#MONTHLY NDVI
+##NDVI calculated for each site
+##bi-monthly date from GIMMS NDVI.3g that I did a monthly max value compositing (MVC)
+ndvi <-"https://raw.githubusercontent.com/brouwern/NDVI3g_GIMMS/master/data/data_out/NDVI_MVC_seasonal_summary_time_series_by_site.csv"
+```
+
+
+Load data from github
+```{r}
+elninos <- get.git.csv(elninos)
+soi <- get.git.csv(soi.yr)
+nao <- get.git.csv(nao.yr)
+mei <- get.git.csv(mei.yr)
+chirps  <- get.git.csv(chirps)
+ndvi  <- get.git.csv(ndvi)
+```
+
+
+## Look at files
+
+```{r}
+names(elninos)
+names(soi)
+names(nao)
+names(mei)
+names(chirps)
+names(ndvi)
+```
+
+```{r}
+dim(soi)
+dim(nao)
+dim(chirps)
+dim(ndvi)
+
+```
+
+
+
+## Process nominal el nino file
+
+```{r}
+i.nino <- which( elninos$nin.phase == "nino")
+elninos. <- elninos[i.nino,]
+ninos.start <- elninos.[,-5]
+ninos.end <- elninos.[,-4]
+
+names(ninos.start)[4] <- "yr"
+names(ninos.end)[4] <- "yr"
+
+names(ninos.start)[3] <- "nino.strt.str"
+names(ninos.end)[3]   <- "nino.end.str"
+
+
+ninos <- merge(ninos.start[,-1],
+               ninos.end[,-1], all = T)
+
+dim(ninos.start)
+dim(ninos.end)
+dim(ninos)
+
+
+head(ninos)
+
+
+
+```
+
+```{r}
+laninas. <- elninos[-i.nino,]
+ninas.start <- laninas.[,-5]
+ninas.end <- laninas.[,-4]
+
+names(ninas.start)[4] <- "yr"
+names(ninas.end)[4] <- "yr"
+
+names(ninas.start)[3] <- "nina.strt.str"
+names(ninas.end)[3]   <- "nina.end.str"
+
+
+ninas <- merge(ninas.start[,-1],
+               ninas.end[,-1], all = T)
+
+dim(ninas.start)
+dim(ninas.end)
+dim(ninas)
+```
+
+
+
+```{r}
+names(ninos)[1] <- "el.nino"
+names(ninas)[1] <- "la.nino"
+nino.o.nina <- merge(ninos,
+               ninas, all = T)
+
+dim(ninos)
+dim(ninas)
+dim(nino.o.nina)
+
+nino.o.nina$el.nino <- as.character(nino.o.nina$el.nino)
+nino.o.nina$nino.strt.str <- as.character(nino.o.nina$nino.strt.str)
+nino.o.nina$nino.end.str <- as.character(nino.o.nina$nino.end.str)
+nino.o.nina$la.nino  <- as.character(nino.o.nina$la.nino )
+nino.o.nina$nina.strt.str <- as.character(nino.o.nina$nina.strt.str)
+nino.o.nina$nina.end.str <- as.character(nino.o.nina$nina.end.str)
+
+nino.o.nina[is.na(nino.o.nina)] <- "no.event"
+
+```
+
+
+## Merge
+
+```{r}
+temp.indices <- merge(soi, nao, all = T)
+dim(soi)
+dim(nao)
+dim(temp.indices)
+
+
+temp.indices2 <- merge(temp.indices,
+                      nino.o.nina,all = T)
+dim(temp.indices)
+dim(temp.indices2)
+
+
+qplot(data = temp.indices2,
+      y = NAO.ann.mean,
+      x = yr, geom = c("point","line")) +
+  geom_point(aes(y = -1*SOI.mean,
+                 x = yr), color = "red") +
+  geom_line(aes(y = -1*SOI.mean,
+                 x = yr), color = "red") +
+  geom_point(aes(y = as.numeric(factor(el.nino)), x = yr),
+             size = 2) +
+  xlim(1950,2017)
+
+factor(temp.indices2$el.nino)
+
+
+```
+
+
+
+
+## Merge all data
+```{r}
+
+temp.env <- merge(chirps, ndvi,all = T)
+dim(chirps)
+dim(ndvi)
+dim(temp.env)
+
+
+names(temp.indices)
+names(temp.env)
+
+env.data.ann.summ <- merge(temp.env, 
+                           temp.indices2, all = T)
+dim(temp.env)
+dim(temp.indices)
+dim(env.data.ann.summ)
+```
+
+
+
+
+## NDVI vs rainfall
+
+```{r}
+qplot(y = rain.mean.win,
+      x  = NAO.mean.win,
+      data = env.data.ann.summ,
+      color = site) +
+  geom_smooth(method = lm, se = F)
+```
+
+
+```{r}
+qplot(y = mean.NDVI.spr,
+      x  = NAO.mean.spr,
+      data = env.data.ann.summ,
+      color = site)+
+  geom_smooth(method = lm, se = T)
+```
+
+```{r}
+qplot(y = mean.NDVI.sum,
+      x  = NAO.mean.sum,
+      data = env.data.ann.summ,
+      color = site)+
+  geom_smooth(method = lm, se = T)
+```
+
+```{r}
+qplot(y = mean.NDVI.fall,
+      x  = NAO.mean.fal,
+      data = env.data.ann.summ,
+      color = site)+
+  geom_smooth(method = lm, se = T)
+```

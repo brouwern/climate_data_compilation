@@ -1,0 +1,99 @@
+---
+title: "Compile monthly climate & environmental data"
+author: "brouwern@gmail.com"
+date: "July 19, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Libraries
+```{r}
+library(RCurl)
+```
+
+## Download data from github
+
+Function to get.csv data from github and load as dataframe
+
+```{r}
+get.git.csv <- function(URL){
+  temp <- getURL(URL)
+  temp <- read.csv(text = temp)
+  return(temp)
+}
+```
+
+
+URLS for processed monthly data on github
+```{r}
+#nominal el nino events, by YEAR
+elninos <-"https://raw.githubusercontent.com/brouwern/el_nino_nominal_events/master/data/data_out/el_nino_nominal_events.csv"
+
+#MONTHLY SOI
+## SOI is a single value for the globe
+soi <- "https://raw.githubusercontent.com/brouwern/global_climate_indices/master/data/data_out/climate_index_SOI_monthly_values1951_2017.csv"
+
+
+#MONTHLY NAO
+## NAO is a single value for the globe
+nao <- "https://raw.githubusercontent.com/brouwern/global_climate_indices/master/data/data_out/climate_index_NAO_monthly_values.csv"
+
+
+
+#2 month running MEI
+## NAO is a single value for the globe
+mei <- "https://raw.githubusercontent.com/brouwern/global_climate_indices/master/data/data_out/climate_index_MEI_monthly_running_values.csv"
+
+
+
+
+#MONTHLY chirps rainfall
+##rainfall calcualted for each site
+chirps <-"https://raw.githubusercontent.com/brouwern/rainfall_CHIRPS/master/data/data_out/CHIRPS_rainfall_monthly_time_series.csv"
+
+#MONTHLY NDVI
+##NDVI calculated for each site
+##bi-monthly date from GIMMS NDVI.3g that I did a monthly max value compositing (MVC)
+ndvi <-"https://raw.githubusercontent.com/brouwern/NDVI3g_GIMMS/master/data/data_out/NDVI_monthly_MVC_time_series_by_site.csv"
+```
+
+
+Load data from github
+```{r}
+elninos <- get.git.csv(elninos)
+soi <- get.git.csv(soi)
+nao <- get.git.csv(nao)
+mei <- get.git.csv(mei)
+chirps  <- get.git.csv(chirps)
+ndvi  <- get.git.csv(ndvi)
+```
+
+
+##
+
+```{r}
+head(soi)
+```
+
+
+```{r}
+names(soi)
+names(nao)
+names(mei)
+names(chirps)
+names(ndvi)
+```
+
+```{r}
+dim(soi)
+dim(nao)
+dim(chirps)
+dim(ndvi)
+
+```
+
+
