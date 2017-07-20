@@ -257,3 +257,14 @@ qplot(y = mean.NDVI.fall,
       color = site)+
   geom_smooth(method = lm, se = T)
 ```
+
+
+
+
+## Save environmental dataframe
+
+```{r}
+write.csv(env.data.ann.summ,
+          file = "data/data_out/env_data_annual_and_seasonal_summaries.csv")
+```
+

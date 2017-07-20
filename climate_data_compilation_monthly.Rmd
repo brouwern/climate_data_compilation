@@ -73,7 +73,7 @@ ndvi  <- get.git.csv(ndvi)
 ```
 
 
-##
+## Look at data
 
 ```{r}
 head(soi)
@@ -96,4 +96,53 @@ dim(ndvi)
 
 ```
 
+
+## Merge
+
+```{r}
+temp.indices <- merge(soi, nao, all = T)
+dim(soi)
+dim(nao)
+dim(temp.indices)
+
+
+
+int <- intersect(names(chirps),names(ndvi))
+ndvi$mo.no.char <- ifelse(ndvi$mo.no.char > 9,ndvi$mo.no.char,
+                          paste(0,ndvi$mo.no.char,
+                                sep = ""))
+
+chirps$yr <- as.numeric(as.character(chirps$yr))
+ndvi$yr <- as.numeric(as.character(ndvi$yr))
+
+summary(chirps[,int])
+summary(ndvi[,int])
+
+
+temp.env <- merge(chirps, ndvi,all = T)
+dim(chirps)
+dim(ndvi)
+dim(temp.env)
+
+
+
+
+
+env.data.mo.summ <- merge(temp.env, 
+                           temp.indices2, all = T)
+dim(temp.env)
+dim(temp.indices)
+dim(env.data.mo.summ)
+
+```
+
+
+
+
+## Save environmental dataframe
+
+```{r}
+write.csv(env.data.mo.summ,
+          file = "data/data_out/env_data_monthly_date.csv")
+```
 
