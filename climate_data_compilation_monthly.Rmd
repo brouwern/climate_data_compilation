@@ -129,7 +129,7 @@ dim(temp.env)
 
 
 env.data.mo.summ <- merge(temp.env, 
-                           temp.indices2, all = T)
+                           temp.indices, all = T)
 dim(temp.env)
 dim(temp.indices)
 dim(env.data.mo.summ)
@@ -139,10 +139,11 @@ dim(env.data.mo.summ)
 
 
 
+
 ## Save environmental dataframe
 
 ```{r}
 write.csv(env.data.mo.summ,
-          file = "data/data_out/env_data_monthly_date.csv")
+          file = "data/data_out/env_data_monthly.csv")
 ```
 

@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Libraries
 ```{r}
 library(RCurl)
+library(ggplot2)
 ```
 
 ## Download data from github
@@ -261,10 +262,22 @@ qplot(y = mean.NDVI.fall,
 
 
 
+## Set up time lag
+```{r}
+i.yr <- which(names(env.data.ann.summ) == "yr")
+names(env.data.ann.summ)[i.yr] <- "yr.observed"
+
+env.data.ann.summ$yr.lagged <- env.data.ann.summ$yr + 1
+```
+
+
+
+
 ## Save environmental dataframe
 
 ```{r}
 write.csv(env.data.ann.summ,
-          file = "data/data_out/env_data_annual_and_seasonal_summaries.csv")
+          file = "data/data_out/env_data_annual_and_seasonal_summaries_w_lag.csv",
+          row.names = F)
 ```
 
