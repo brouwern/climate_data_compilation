@@ -1,0 +1,110 @@
+---
+title: "Untitled"
+author: "brouwern@gmail.com"
+date: "July 18, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 
+
+
+
+
+```{r}
+load("./data/data_out/NDVI_time_series_by_site.RData")
+```
+
+
+
+
+
+
+## Pairs plot
+
+```{r}
+i.scrub <- with(dat7, which(site == "scrub"))
+ggpairs(dat7[-i.scrub,],
+        columns = c("mean.NDVI.spr","mean.NDVI.sum",
+                    "mean.NDVI.fall","mean.NDVI.year",
+                    "mean.NDVI.win"),
+        diag = NULL,
+        mapping = aes(color = nin.phase.strt))
+```
+
+
+
+## Save summaries
+```{r}
+write.csv(dat7,file = "./data/NDVI_annual_summaries_1993_2015.csv",
+          row.names = FALSE)
+```
+
+
+
+
+
+
+
+
+## Set up time lag
+
+```{r}
+dat7.lag <- dat7[,c("yr","site",
+                    "mean.NDVI.win","mean.NDVI.spr",
+                    "mean.NDVI.sum","mean.NDVI.fall",
+                    "mean.NDVI.year")]
+
+dat7.lag$yr.orig <- dat7.lag$yr
+
+dat7.lag$yr <- dat7.lag$yr + 1
+
+
+names(dat7.lag)[-c(1:2)] <- paste("lag",
+                                   names(dat7.lag)[-c(1:2)], 
+                                   sep = ".")
+```
+
+
+## Merge lagged w/ orig
+
+```{r}
+
+dat8 <- merge(dat7, dat7.lag)
+
+
+dim(dat7)
+dim(dat8)
+```
+
+
+
+
+
+
+## Save summaries
+```{r}
+write.csv(dat8,
+          file = "./data/data_out/NDVI_annual_summaries_1993_2015.csv",
+          row.names = FALSE)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
