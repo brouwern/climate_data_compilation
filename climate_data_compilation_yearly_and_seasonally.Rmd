@@ -271,6 +271,16 @@ env.data.ann.summ$yr.lagged <- env.data.ann.summ$yr + 1
 ```
 
 
+## Check before saving
+```{r}
+summary(env.data.ann.summ)
+```
+
+
+## Reconcile names
+```{r}
+names(env.data.ann.summ)[2] <- "habitat"
+```
 
 
 ## Save environmental dataframe
