@@ -56,6 +56,8 @@ mei.yr <- "https://raw.githubusercontent.com/brouwern/global_climate_indices/mas
 ##rainfall calcualted for each site
 chirps <-"https://raw.githubusercontent.com/brouwern/rainfall_CHIRPS/master/data/data_out/CHIRPS_rainfall_annual_summary.csv"
 
+faaborg.chirps <- "https://raw.githubusercontent.com/brouwern/rainfall_CHIRPS/master/data/data_out/CHIRPS_rainfall_monthly_time_series_Faaborg.csv"
+
 #MONTHLY NDVI
 ##NDVI calculated for each site
 ##bi-monthly date from GIMMS NDVI.3g that I did a monthly max value compositing (MVC)
@@ -70,6 +72,7 @@ soi <- get.git.csv(soi.yr)
 nao <- get.git.csv(nao.yr)
 mei <- get.git.csv(mei.yr)
 chirps  <- get.git.csv(chirps)
+faaborg.chirps <- get.git.csv(faaborg.chirps)
 ndvi  <- get.git.csv(ndvi)
 ```
 
@@ -82,6 +85,7 @@ names(soi)
 names(nao)
 names(mei)
 names(chirps)
+dim(faaborg.chirps)
 names(ndvi)
 ```
 
@@ -89,6 +93,7 @@ names(ndvi)
 dim(soi)
 dim(nao)
 dim(chirps)
+dim(faaborg.chirps)
 dim(ndvi)
 
 ```
@@ -96,6 +101,8 @@ dim(ndvi)
 
 
 ## Process nominal el nino file
+
+Am not happy with this; should probably just classify based on raw data
 
 ```{r}
 i.nino <- which( elninos$nin.phase == "nino")
@@ -270,23 +277,48 @@ names(env.data.ann.summ)[i.yr] <- "yr.observed"
 env.data.ann.summ$yr.lagged <- env.data.ann.summ$yr + 1
 ```
 
+```{r}
+names(faaborg.chirps)[1] <- "yr.lagged"
+
+env.data.ann.summ2 <- merge(faaborg.chirps,
+                            env.data.ann.summ,
+                            all = TRUE)
+
+dim(env.data.ann.summ)
+dim(env.data.ann.summ2)
+```
+
+
+
+## Plot
+```{r}
+qplot(y = rain.full._,
+      x = rain.sum.yr,
+      data = env.data.ann.summ2,
+      color = site) + #facet_wrap(~yr) +
+  geom_abline(slope = 1, intercept = 0)
+```
+
+
+
+
 
 ## Check before saving
 ```{r}
-summary(env.data.ann.summ)
+summary(env.data.ann.summ2)
 ```
 
 
 ## Reconcile names
 ```{r}
-names(env.data.ann.summ)[2] <- "habitat"
+names(env.data.ann.summ2)[2] <- "habitat"
 ```
 
 
 ## Save environmental dataframe
 
 ```{r}
-write.csv(env.data.ann.summ,
+write.csv(env.data.ann.summ2,
           file = "data/data_out/env_data_annual_and_seasonal_summaries_w_lag.csv",
           row.names = F)
 ```
